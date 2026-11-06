@@ -1,0 +1,161 @@
+<div class="register-page">
+  <header class="register-header">
+    <a routerLink="/" class="brand">
+      <div class="brand-emblem">M</div>
+      <div class="brand-copy">
+        <span class="brand-name">MANNBOARD</span>
+        <span class="brand-tagline">TU COMUNIDAD. TU CAMPO DE BATALLA.</span>
+      </div>
+    </a>
+
+    <span class="header-label">REGISTRO DE PERSONAL</span>
+  </header>
+
+  <main class="register-content">
+    <div class="register-heading">
+      <span class="eyebrow">OFICINA DE RECLUTAMIENTO · MANN CO.</span>
+      <h1>SUMATE A LA <span>COMUNIDAD.</span></h1>
+      <p>Completá tu ficha personal para incorporarte a la red.</p>
+    </div>
+
+    <form class="register-card" (ngSubmit)="registrar()" #registroForm="ngForm">
+      <div class="section-heading">
+        <span>01</span>
+        <div>
+          <h2>INFORMACIÓN PERSONAL</h2>
+          <p>Completá tus datos de identificación.</p>
+        </div>
+      </div>
+
+      <div class="form-grid">
+        <label>
+          NOMBRE
+          <input
+            type="text"
+            name="nombre"
+            [(ngModel)]="nombre"
+            required
+            maxlength="50"
+            placeholder="Tu nombre"
+          />
+        </label>
+
+        <label>
+          APELLIDO
+          <input
+            type="text"
+            name="apellido"
+            [(ngModel)]="apellido"
+            required
+            maxlength="50"
+            placeholder="Tu apellido"
+          />
+        </label>
+
+        <label class="full-width">
+          CORREO ELECTRÓNICO
+          <input
+            type="email"
+            name="email"
+            [(ngModel)]="email"
+            required
+            email
+            maxlength="100"
+            placeholder="correo@ejemplo.com"
+          />
+        </label>
+
+        <label class="full-width">
+          NOMBRE DE USUARIO
+          <input
+            type="text"
+            name="username"
+            [(ngModel)]="username"
+            required
+            minlength="3"
+            maxlength="30"
+            placeholder="Elegí tu nombre de usuario"
+          />
+        </label>
+
+        <label>
+          CONTRASEÑA
+          <input
+            type="password"
+            name="password"
+            [(ngModel)]="password"
+            required
+            minlength="8"
+            placeholder="Mínimo 8 caracteres"
+          />
+        </label>
+
+        <label>
+          REPETIR CONTRASEÑA
+          <input
+            type="password"
+            name="repetirPassword"
+            [(ngModel)]="repetirPassword"
+            required
+            placeholder="Repetí tu contraseña"
+          />
+        </label>
+      </div>
+
+      <div class="section-heading second-section">
+        <span>02</span>
+        <div>
+          <h2>PERFIL DE USUARIO</h2>
+          <p>Contale a la comunidad un poco sobre vos.</p>
+        </div>
+      </div>
+
+      <div class="form-grid">
+        <label>
+          FECHA DE NACIMIENTO
+          <input type="date" name="fechaNacimiento" [(ngModel)]="fechaNacimiento" required />
+        </label>
+
+        <label>
+          FOTO DE PERFIL
+          <input
+            type="file"
+            name="imagenPerfil"
+            accept=".jpg,.jpeg,.png,.webp"
+            (change)="seleccionarImagen($event)"
+          />
+        </label>
+
+        <label class="full-width">
+          DESCRIPCIÓN PERSONAL
+          <textarea
+            name="descripcion"
+            [(ngModel)]="descripcion"
+            maxlength="250"
+            rows="3"
+            placeholder="¿Qué juegos te gustan? ¿Cuáles son tus intereses?"
+          ></textarea>
+          <span class="character-count">{{ descripcion.length }}/250</span>
+        </label>
+      </div>
+
+      @if (mensajeError) {
+        <div class="feedback error">{{ mensajeError }}</div>
+      }
+
+      @if (mensajeExito) {
+        <div class="feedback success">{{ mensajeExito }}</div>
+      }
+
+      <div class="form-footer">
+        <p>¿YA TENÉS UNA CUENTA? <a routerLink="/login">INICIÁ SESIÓN</a></p>
+        <button type="submit" [disabled]="!registroForm.valid || registrando">
+          {{ registrando ? 'CREANDO CUENTA...' : 'CREAR CUENTA' }}
+          <span>↗</span>
+        </button>
+      </div>
+    </form>
+
+    <footer class="register-footer">MANN CO. © 2026 · HECHO PARA LA COMUNIDAD.</footer>
+  </main>
+</div>

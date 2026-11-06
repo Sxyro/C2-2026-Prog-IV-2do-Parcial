@@ -1,0 +1,243 @@
+<div class="profile-page">
+  <header class="topbar">
+    <a class="brand" routerLink="/">
+      <div class="brand-emblem">
+        <span>M</span>
+      </div>
+
+      <div class="brand-copy">
+        <span class="brand-name">MANNBOARD</span>
+        <span class="brand-tagline">TU COMUNIDAD. TU CAMPO DE BATALLA.</span>
+      </div>
+    </a>
+
+    <div class="topbar-center">
+      <span class="status-dot"></span>
+      RED DE MANN CO. OPERATIVA
+    </div>
+
+    <div class="profile-topbar-actions">
+      @if (usuarioActual(); as usuario) {
+        <a class="topbar-login profile-user-link" routerLink="/mi-perfil">
+          @if (usuario.imagenPerfil) {
+            <img [src]="usuario.imagenPerfil" alt="Avatar" />
+          }
+          <span>{{ usuario.username }}</span>
+        </a>
+
+        <button class="topbar-login profile-logout" type="button" (click)="cerrarSesion()">
+          CERRAR SESIÓN
+        </button>
+      } @else {
+        <a class="topbar-login" routerLink="/login">INGRESAR →</a>
+        <a class="topbar-login" routerLink="/registro">REGISTRARSE →</a>
+      }
+    </div>
+  </header>
+
+  <div class="content-layout">
+    <aside class="sidebar">
+      <div class="sidebar-section">
+        <span class="sidebar-title">CENTRO DE OPERACIONES</span>
+
+        <a class="sidebar-link" routerLink="/">
+          <span class="link-icon">⌂</span>
+          Inicio
+        </a>
+
+        <a class="sidebar-link" routerLink="/publicaciones">
+          <span class="link-icon">▤</span>
+          Publicaciones
+        </a>
+      </div>
+
+      <div class="sidebar-section">
+        <span class="sidebar-title">MI ESPACIO</span>
+
+        <a class="sidebar-link active" routerLink="/mi-perfil">
+          <span class="link-icon">◉</span>
+          Mi perfil
+        </a>
+
+        <a class="sidebar-link" routerLink="/registro">
+          <span class="link-icon">＋</span>
+          Crear cuenta
+        </a>
+      </div>
+
+      <div class="sidebar-divider"></div>
+
+      <div class="division-card">
+        <span class="division-label">MI AFILIACIÓN</span>
+
+        <div
+          class="division-badge"
+          [class.red-badge]="usuario.equipo === 'RED'"
+          [class.blue-badge]="usuario.equipo === 'BLU'"
+        >
+          {{ usuario.equipo }}
+        </div>
+
+        <p>Tu división dentro de la comunidad.</p>
+      </div>
+
+      <div class="sidebar-bottom">
+        <span>MANN CO. / 1946</span>
+        <span>HECHO PARA LA COMUNIDAD.</span>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <div class="page-heading">
+        <div>
+          <span class="eyebrow">MANN CO. / REGISTRO DE PERSONAL</span>
+          <h1>MI PERFIL</h1>
+          <p>Tu identidad y actividad dentro de MANNBOARD.</p>
+        </div>
+
+        <span class="profile-status">
+          <span class="status-dot"></span>
+          PERFIL ACTIVO
+        </span>
+      </div>
+
+      <section class="profile-card">
+        <div
+          class="profile-banner"
+          [class.red-banner]="usuario.equipo === 'RED'"
+          [class.blue-banner]="usuario.equipo === 'BLU'"
+        >
+          <span class="banner-code">
+            EXPEDIENTE DE PERSONAL / MB-{{ usuario.username.toUpperCase() }}
+          </span>
+          <span class="banner-division">{{ usuario.equipo }} DIVISION</span>
+        </div>
+
+        <div class="profile-main">
+          <div
+            class="profile-avatar"
+            [class.red-avatar]="usuario.equipo === 'RED'"
+            [class.blue-avatar]="usuario.equipo === 'BLU'"
+          >
+            @if (usuario.imagenPerfil) {
+              <img [src]="usuario.imagenPerfil" alt="Foto de perfil" />
+            } @else {
+              {{ usuario.iniciales }}
+            }
+          </div>
+
+          <div class="profile-identity">
+            <span class="identity-label">IDENTIFICACIÓN DEL PERSONAL</span>
+            <h2>{{ usuario.nombre }} {{ usuario.apellido }}</h2>
+            <span class="profile-username">&#64;{{ usuario.username }}</span>
+          </div>
+
+          <div
+            class="profile-team"
+            [class.red-team]="usuario.equipo === 'RED'"
+            [class.blue-team]="usuario.equipo === 'BLU'"
+          >
+            {{ usuario.equipo }}
+          </div>
+        </div>
+
+        <p class="profile-description">{{ usuario.descripcion }}</p>
+
+        <div class="profile-metrics">
+          <div class="metric">
+            <strong>{{ publicaciones.length }}</strong>
+            <span>PUBLICACIONES</span>
+          </div>
+
+          <div class="metric">
+            <strong>{{ usuario.perfil }}</strong>
+            <span>RANGO DE CUENTA</span>
+          </div>
+
+          <div class="metric">
+            <strong>{{ usuario.equipo }}</strong>
+            <span>DIVISIÓN</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="details-section">
+        <div class="section-heading">
+          <div>
+            <span class="section-label">ARCHIVO DE PERSONAL</span>
+            <h2>Información de la cuenta</h2>
+          </div>
+          <span class="section-code">DATOS REGISTRADOS</span>
+        </div>
+
+        <div class="details-grid">
+          <div class="detail-item">
+            <span>NOMBRE</span>
+            <strong>{{ usuario.nombre }}</strong>
+          </div>
+
+          <div class="detail-item">
+            <span>APELLIDO</span>
+            <strong>{{ usuario.apellido }}</strong>
+          </div>
+
+          <div class="detail-item">
+            <span>NOMBRE DE USUARIO</span>
+            <strong>&#64;{{ usuario.username }}</strong>
+          </div>
+
+          <div class="detail-item">
+            <span>CORREO ELECTRÓNICO</span>
+            <strong>{{ usuario.email }}</strong>
+          </div>
+
+          <div class="detail-item">
+            <span>FECHA DE NACIMIENTO</span>
+            <strong>{{ usuario.fechaNacimiento }}</strong>
+          </div>
+
+          <div class="detail-item">
+            <span>TIPO DE CUENTA</span>
+            <strong>{{ usuario.perfil }}</strong>
+          </div>
+        </div>
+      </section>
+
+      <section class="activity-section">
+        <div class="section-heading">
+          <div>
+            <span class="section-label">REGISTRO DE ACTIVIDAD</span>
+            <h2>Mis publicaciones</h2>
+          </div>
+
+          <span class="section-code">{{ publicaciones.length }} REGISTROS</span>
+        </div>
+
+        <div class="posts-list">
+          @for (publicacion of publicaciones; track publicacion.id) {
+            <article class="post-card">
+              <div class="post-category">{{ publicacion.categoria }}</div>
+
+              <h3>{{ publicacion.titulo }}</h3>
+
+              <p>{{ publicacion.contenido }}</p>
+
+              <div class="post-footer">
+                <span>{{ publicacion.tiempo }}</span>
+
+                <div class="post-stats">
+                  <span>♥ {{ publicacion.likes }} ME GUSTA</span>
+                  <span>▤ {{ publicacion.comentarios }} COMENTARIOS</span>
+                </div>
+
+                <span class="post-reference">
+                  MB-{{ publicacion.id.toString().padStart(3, '0') }}
+                </span>
+              </div>
+            </article>
+          }
+        </div>
+      </section>
+    </main>
+  </div>
+</div>

@@ -1,0 +1,219 @@
+<div class="publicaciones-page">
+  <header class="topbar">
+    <a class="brand" routerLink="/">
+      <div class="brand-emblem">
+        <span>M</span>
+      </div>
+
+      <div class="brand-copy">
+        <span class="brand-name">MANNBOARD</span>
+        <span class="brand-tagline">TU COMUNIDAD. TU CAMPO DE BATALLA.</span>
+      </div>
+    </a>
+
+    <div class="topbar-center">
+      <span class="status-dot"></span>
+      RED DE MANN CO. OPERATIVA
+    </div>
+
+    @if (usuarioActual(); as usuario) {
+      <div class="topbar-user">
+        <a class="topbar-login" routerLink="/mi-perfil">
+          @if (usuario.imagenPerfil) {
+            <img [src]="usuario.imagenPerfil" alt="Avatar" class="topbar-avatar" />
+          }
+          {{ usuario.username }}
+        </a>
+
+        <button class="topbar-login" type="button" (click)="cerrarSesion()">CERRAR SESIÓN</button>
+      </div>
+    } @else {
+      <div class="topbar-user">
+        <a class="topbar-login" routerLink="/login">INGRESAR →</a>
+        <a class="topbar-login" routerLink="/registro">REGISTRARSE →</a>
+      </div>
+    }
+  </header>
+
+  <div class="content-layout">
+    <aside class="sidebar">
+      <div class="sidebar-section">
+        <span class="sidebar-title">CENTRO DE OPERACIONES</span>
+
+        <a class="sidebar-link" routerLink="/">
+          <span class="link-icon">⌂</span>
+          Inicio
+        </a>
+
+        <a class="sidebar-link active" routerLink="/publicaciones">
+          <span class="link-icon">▤</span>
+          Publicaciones
+        </a>
+      </div>
+
+      <div class="sidebar-section">
+        <span class="sidebar-title">MI ESPACIO</span>
+
+        @if (usuarioActual()) {
+          <a class="sidebar-link" routerLink="/mi-perfil">
+            <span class="link-icon">◉</span>
+            Mi perfil
+          </a>
+        } @else {
+          <a class="sidebar-link" routerLink="/login">
+            <span class="link-icon">◉</span>
+            Ingresar
+          </a>
+
+          <a class="sidebar-link" routerLink="/registro">
+            <span class="link-icon">＋</span>
+            Crear cuenta
+          </a>
+        }
+      </div>
+
+      <div class="sidebar-divider"></div>
+
+      <div class="division-card">
+        <span class="division-label">AFILIACIÓN</span>
+
+        <div class="division-badges">
+          <span class="red-badge">RED</span>
+          <span class="blue-badge">BLU</span>
+        </div>
+
+        <p>Elegí tu bando. Encontrá tu comunidad.</p>
+      </div>
+
+      <div class="sidebar-bottom">
+        <span>MANN CO. / 1946</span>
+        <span>HECHO PARA LA COMUNIDAD.</span>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <div class="page-heading">
+        <div>
+          <span class="eyebrow">MANN CO. / CENTRO DE COMUNICACIONES</span>
+          <h1>PUBLICACIONES</h1>
+          <p>Todo lo que está pasando dentro de nuestra comunidad.</p>
+        </div>
+
+        <div class="network-indicator">
+          <span class="status-dot"></span>
+          RED CONECTADA
+        </div>
+      </div>
+
+      <section class="feed-section">
+        <div class="feed-heading">
+          <div>
+            <span class="section-label">TRANSMISIONES DE LA COMUNIDAD</span>
+            <h2>Actividad reciente</h2>
+          </div>
+
+          <span class="post-count"> {{ publicaciones.length }} PUBLICACIONES </span>
+        </div>
+
+        <div class="posts-list">
+          @for (publicacion of publicaciones; track publicacion.id) {
+            <article class="post-card">
+              <div class="post-header">
+                <div
+                  class="user-avatar"
+                  [class.red-avatar]="publicacion.equipo === 'RED'"
+                  [class.blue-avatar]="publicacion.equipo === 'BLU'"
+                >
+                  {{ publicacion.iniciales }}
+                </div>
+
+                <div class="user-info">
+                  <span class="user-name">{{ publicacion.usuario }}</span>
+                  <span class="user-alias">{{ publicacion.alias }}</span>
+                </div>
+
+                <div
+                  class="team-label"
+                  [class.red-team]="publicacion.equipo === 'RED'"
+                  [class.blue-team]="publicacion.equipo === 'BLU'"
+                >
+                  {{ publicacion.equipo }}
+                </div>
+
+                <span class="post-time">{{ publicacion.tiempo }}</span>
+              </div>
+
+              <div class="post-content">
+                <span class="post-category">{{ publicacion.categoria }}</span>
+
+                <h3>{{ publicacion.titulo }}</h3>
+
+                <p>{{ publicacion.contenido }}</p>
+              </div>
+
+              <div class="post-footer">
+                <div class="post-stat">
+                  <span>♥</span>
+                  {{ publicacion.likes }} ME GUSTA
+                </div>
+
+                <div class="post-stat">
+                  <span>▤</span>
+                  {{ publicacion.comentarios }} COMENTARIOS
+                </div>
+
+                <span class="post-reference">
+                  MB-{{ publicacion.id.toString().padStart(3, '0') }}
+                </span>
+              </div>
+            </article>
+          }
+        </div>
+      </section>
+
+      <div class="feed-end">
+        <span></span>
+        FIN DE LAS TRANSMISIONES ACTUALES
+        <span></span>
+      </div>
+    </main>
+
+    <aside class="right-panel">
+      <section class="panel-card">
+        <span class="panel-label">ESTADO DE LA RED</span>
+        <div class="online-status">
+          <span class="status-dot"></span>
+          <strong>EN LÍNEA</strong>
+        </div>
+        <p>La comunidad está operativa.</p>
+        <div class="panel-divider"></div>
+        <div class="network-stat">
+          <span>Publicaciones visibles</span>
+          <strong>{{ publicaciones.length }}</strong>
+        </div>
+      </section>
+
+      <section class="panel-card">
+        <span class="panel-label">DIVISIONES ACTIVAS</span>
+
+        <div class="team-row">
+          <span class="team-square red-square"></span>
+          <span>División RED</span>
+          <strong>RED</strong>
+        </div>
+
+        <div class="team-row">
+          <span class="team-square blue-square"></span>
+          <span>División BLU</span>
+          <strong>BLU</strong>
+        </div>
+      </section>
+
+      <section class="panel-card quote-card">
+        <span class="panel-label">MENSAJE DE MANN CO.</span>
+        <p>"Una comunidad es tan fuerte como las personas que la integran."</p>
+        <span class="quote-author">— DIRECCIÓN MANN CO.</span>
+      </section>
+    </aside>
+  </div>
+</div>

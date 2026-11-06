@@ -1,0 +1,117 @@
+<div class="login-page">
+  <header class="login-header">
+    <a class="brand" routerLink="/">
+      <div class="brand-emblem">
+        <span>M</span>
+      </div>
+
+      <div class="brand-copy">
+        <span class="brand-name">MANNBOARD</span>
+        <span class="brand-tagline">TU COMUNIDAD. TU CAMPO DE BATALLA.</span>
+      </div>
+    </a>
+
+    <div class="header-status">
+      <span class="status-dot"></span>
+      RED DE MANN CO. OPERATIVA
+    </div>
+  </header>
+
+  <main class="login-main">
+    <section class="login-card">
+      <div class="card-top">
+        <span class="section-code">ACCESO DE PERSONAL · MB-001</span>
+        <span class="division-mark">MANN CO.</span>
+      </div>
+
+      <div class="login-heading">
+        <div class="heading-emblem">
+          <span>M</span>
+        </div>
+
+        <p class="eyebrow">CENTRO DE IDENTIFICACIÓN</p>
+
+        <h1>BIENVENIDO<br />DE VUELTA.</h1>
+
+        <p class="heading-description">Ingresá tus credenciales para acceder a la comunidad.</p>
+      </div>
+
+      <form class="login-form" (ngSubmit)="iniciarSesion()">
+        <div class="form-group">
+          <label for="identificador">USUARIO O CORREO ELECTRÓNICO</label>
+
+          <input
+            id="identificador"
+            type="text"
+            name="identificador"
+            [(ngModel)]="identificador"
+            placeholder="Tu usuario o correo"
+            autocomplete="username"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="password">CONTRASEÑA</label>
+
+          <input
+            id="password"
+            type="password"
+            name="password"
+            [(ngModel)]="password"
+            placeholder="Ingresá tu contraseña"
+            autocomplete="current-password"
+            required
+            minlength="8"
+          />
+        </div>
+
+        @if (mensajeError) {
+          <div class="feedback error">
+            {{ mensajeError }}
+          </div>
+        }
+
+        @if (mensajeExito) {
+          <div class="feedback success">
+            {{ mensajeExito }}
+          </div>
+        }
+
+        <button class="login-button" type="submit" [disabled]="iniciandoSesion">
+          <span>
+            {{ iniciandoSesion ? 'INGRESANDO...' : 'INGRESAR A MANNBOARD' }}
+          </span>
+          <span class="button-arrow">→</span>
+        </button>
+      </form>
+
+      <div class="login-divider">
+        <span></span>
+        <p>¿TODAVÍA NO SOS PARTE?</p>
+        <span></span>
+      </div>
+
+      <a class="register-link" routerLink="/registro">
+        CREAR UNA CUENTA
+        <span>→</span>
+      </a>
+
+      <div class="card-footer">
+        <span>IDENTIFICACIÓN REQUERIDA</span>
+        <span>MB / 1946</span>
+      </div>
+    </section>
+
+    <div class="login-decoration">
+      <div class="decoration-line"></div>
+      <p>YOUR COMMUNITY. YOUR BATTLEFIELD.</p>
+      <span>RED // BLU — MANN CO. DIVISION</span>
+    </div>
+  </main>
+
+  <footer class="login-footer">
+    <span>© MANN CO. · MANNBOARD</span>
+    <span>HECHO PARA LA COMUNIDAD.</span>
+  </footer>
+</div>
