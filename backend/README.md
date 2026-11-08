@@ -31,6 +31,26 @@
 $ npm install
 ```
 
+## Mannboard API
+
+Configure `MONGODB_URI`, `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`,
+`CLOUDINARY_API_SECRET`, and `AUTH_TOKEN_SECRET` in the backend environment.
+`AUTH_TOKEN_SECRET` must be a long, random value and must also be set in the
+production hosting environment. The API accepts the deployed frontend origin
+and `http://localhost:4200` for local development.
+
+The authenticated routes use `Authorization: Bearer <accessToken>`. Login
+returns the user data and a seven-day access token.
+
+| Method | Route | Description |
+| --- | --- | --- |
+| `POST` | `/publicaciones` | Create a post (`titulo`, `descripcion`, optional `imagen` file) |
+| `GET` | `/publicaciones?orden=fecha&offset=0&limit=10` | List active posts; `orden` can be `fecha` or `likes`, with optional `usuarioId` |
+| `DELETE` | `/publicaciones/:id` | Logically delete a post as its author or an administrator |
+| `POST` | `/publicaciones/:id/likes` | Like a post once per user |
+| `DELETE` | `/publicaciones/:id/likes` | Remove the current user's like |
+| `POST` | `/publicaciones/:id/comentarios` | Add a comment (`texto`) |
+
 ## Compile and run the project
 
 ```bash

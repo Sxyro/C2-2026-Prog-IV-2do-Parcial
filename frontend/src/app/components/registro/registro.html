@@ -27,80 +27,122 @@
         </div>
       </div>
 
-      <div class="form-grid">
-        <label>
-          NOMBRE
-          <input
-            type="text"
-            name="nombre"
-            [(ngModel)]="nombre"
-            required
-            maxlength="50"
-            placeholder="Tu nombre"
-          />
-        </label>
+        <div class="form-grid">
+          <label>
+            NOMBRE
+            <input
+              type="text"
+              name="nombre"
+              [(ngModel)]="nombre"
+              #nombreControl="ngModel"
+              required
+              maxlength="50"
+              placeholder="Tu nombre"
+            />
+            @if (nombreControl.touched && nombreControl.errors?.['required']) {
+              <span class="field-error">El nombre es obligatorio.</span>
+            }
+          </label>
 
-        <label>
-          APELLIDO
-          <input
-            type="text"
-            name="apellido"
-            [(ngModel)]="apellido"
-            required
-            maxlength="50"
-            placeholder="Tu apellido"
-          />
-        </label>
+          <label>
+            APELLIDO
+            <input
+              type="text"
+              name="apellido"
+              [(ngModel)]="apellido"
+              #apellidoControl="ngModel"
+              required
+              maxlength="50"
+              placeholder="Tu apellido"
+            />
+            @if (apellidoControl.touched && apellidoControl.errors?.['required']) {
+              <span class="field-error">El apellido es obligatorio.</span>
+            }
+          </label>
 
-        <label class="full-width">
-          CORREO ELECTRÓNICO
-          <input
-            type="email"
-            name="email"
-            [(ngModel)]="email"
-            required
-            email
-            maxlength="100"
-            placeholder="correo@ejemplo.com"
-          />
-        </label>
+          <label class="full-width">
+            CORREO ELECTRÓNICO
+            <input
+              type="email"
+              name="email"
+              [(ngModel)]="email"
+              #emailControl="ngModel"
+              required
+              email
+              maxlength="100"
+              placeholder="correo@ejemplo.com"
+            />
+            @if (emailControl.touched && emailControl.errors?.['required']) {
+              <span class="field-error">El correo electrónico es obligatorio.</span>
+            }
+            @if (emailControl.touched && emailControl.errors?.['email']) {
+              <span class="field-error">Ingresá un correo electrónico válido.</span>
+            }
+          </label>
 
-        <label class="full-width">
-          NOMBRE DE USUARIO
-          <input
-            type="text"
-            name="username"
-            [(ngModel)]="username"
-            required
-            minlength="3"
-            maxlength="30"
-            placeholder="Elegí tu nombre de usuario"
-          />
-        </label>
+          <label class="full-width">
+            NOMBRE DE USUARIO
+            <input
+              type="text"
+              name="username"
+              [(ngModel)]="username"
+              #usernameControl="ngModel"
+              required
+              minlength="3"
+              maxlength="30"
+              placeholder="Elegí tu nombre de usuario"
+            />
+            @if (usernameControl.touched && usernameControl.errors?.['required']) {
+              <span class="field-error">El nombre de usuario es obligatorio.</span>
+            }
+            @if (usernameControl.touched && usernameControl.errors?.['minlength']) {
+              <span class="field-error">Debe tener al menos 3 caracteres.</span>
+            }
+          </label>
 
-        <label>
-          CONTRASEÑA
-          <input
-            type="password"
-            name="password"
-            [(ngModel)]="password"
-            required
-            minlength="8"
-            placeholder="Mínimo 8 caracteres"
-          />
-        </label>
+          <label>
+            CONTRASEÑA
+            <input
+              type="password"
+              name="password"
+              [(ngModel)]="password"
+              #passwordControl="ngModel"
+              required
+              minlength="8"
+              pattern="(?=.*[A-Z])(?=.*[0-9]).{8,}"
+              placeholder="Mínimo 8 caracteres"
+            />
+            @if (passwordControl.touched && passwordControl.errors?.['required']) {
+              <span class="field-error">La contraseña es obligatoria.</span>
+            }
+            @if (
+              passwordControl.touched &&
+              (passwordControl.errors?.['minlength'] || passwordControl.errors?.['pattern'])
+            ) {
+              <span class="field-error">
+                Necesita al menos 8 caracteres, una mayúscula y un número.
+              </span>
+            }
+          </label>
 
-        <label>
-          REPETIR CONTRASEÑA
-          <input
-            type="password"
-            name="repetirPassword"
-            [(ngModel)]="repetirPassword"
-            required
-            placeholder="Repetí tu contraseña"
-          />
-        </label>
-      </div>
+          <label>
+            REPETIR CONTRASEÑA
+            <input
+              type="password"
+              name="repetirPassword"
+              [(ngModel)]="repetirPassword"
+              #repetirControl="ngModel"
+              required
+              placeholder="Repetí tu contraseña"
+            />
+            @if (repetirControl.touched && repetirControl.errors?.['required']) {
+              <span class="field-error">Tenés que repetir la contraseña.</span>
+            }
+            @if (repetirControl.touched && repetirPassword && password !== repetirPassword) {
+              <span class="field-error">Las contraseñas no coinciden.</span>
+            }
+          </label>
+        </div>
 
       <div class="section-heading second-section">
         <span>02</span>
@@ -113,7 +155,16 @@
       <div class="form-grid">
         <label>
           FECHA DE NACIMIENTO
-          <input type="date" name="fechaNacimiento" [(ngModel)]="fechaNacimiento" required />
+          <input
+            type="date"
+            name="fechaNacimiento"
+            [(ngModel)]="fechaNacimiento"
+            #fechaControl="ngModel"
+            required
+          />
+          @if (fechaControl.touched && fechaControl.errors?.['required']) {
+            <span class="field-error">La fecha de nacimiento es obligatoria.</span>
+          }
         </label>
 
         <label>

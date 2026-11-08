@@ -1,21 +1,14 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { DatePipe } from '@angular/common';
+import { HttpErrorResponse } from '@angular/common/http';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth';
-
-interface PublicacionPerfil {
-  id: number;
-  categoria: string;
-  titulo: string;
-  contenido: string;
-  tiempo: string;
-  likes: number;
-  comentarios: number;
-}
+import { Publicacion, PublicacionesService } from '../../services/publicaciones';
 
 @Component({
   selector: 'app-mi-perfil',
   standalone: true,
-  imports: [RouterLink],
+  imports: [DatePipe, RouterLink],
   templateUrl: './mi-perfil.html',
   styleUrl: './mi-perfil.scss',
 })
@@ -30,47 +23,20 @@ export class MiPerfilComponent implements OnInit {
     fechaNacimiento: '',
     descripcion: '',
     imagenPerfil: '',
-    equipo: 'RED' as 'RED' | 'BLU',
     perfil: 'Usuario',
     iniciales: '',
   };
 
-  publicaciones: PublicacionPerfil[] = [
-    {
-      id: 1,
-      categoria: 'TEAM FORTRESS 2',
-      titulo: 'Mi clase favorita sigue siendo el Scout',
-      contenido:
-        'No importa cuántas horas juegue, siempre termino volviendo al Scout. La movilidad y el ritmo de juego son incomparables.',
-      tiempo: 'Hace 2 horas',
-      likes: 42,
-      comentarios: 12,
-    },
-    {
-      id: 2,
-      categoria: 'HARDWARE Y VIDEOJUEGOS',
-      titulo: 'Actualización de mi espacio de juego',
-      contenido:
-        'Finalmente pude organizar todo mi setup. Ahora tengo mucho más espacio para jugar y trabajar cómodamente.',
-      tiempo: 'Ayer',
-      likes: 28,
-      comentarios: 7,
-    },
-    {
-      id: 3,
-      categoria: 'COMUNIDAD',
-      titulo: '¿Qué juegos están jugando últimamente?',
-      contenido:
-        'Estoy buscando recomendaciones para probar algo nuevo. ¿Qué juegos les están dando más horas de diversión?',
-      tiempo: 'Hace 3 días',
-      likes: 19,
-      comentarios: 5,
-    },
-  ];
+  publicaciones: Publicacion[] = [];
+  totalPublicaciones = 0;
+  mensajeError = '';
+  cargandoPublicaciones = false;
 
   constructor(
     private readonly authService: AuthService,
+    private readonly publicacionesService: PublicacionesService,
     private readonly router: Router,
+    private readonly cdr: ChangeDetectorRef,
   ) {
     this.usuarioActual = this.authService.usuarioActual;
   }
@@ -79,7 +45,7 @@ export class MiPerfilComponent implements OnInit {
     const usuarioActual = this.authService.obtenerUsuario();
 
     if (!usuarioActual) {
-      this.router.navigate(['/login']);
+      void this.router.navigate(['/login']);
       return;
     }
 
@@ -88,17 +54,65 @@ export class MiPerfilComponent implements OnInit {
       apellido: usuarioActual.apellido,
       username: usuarioActual.username,
       email: usuarioActual.email,
-      fechaNacimiento: new Date(usuarioActual.fechaNacimiento).toISOString().slice(0, 10).split('-').reverse().join('/'),
+      fechaNacimiento: this.formatearFecha(usuarioActual.fechaNacimiento),
       descripcion: usuarioActual.descripcion || 'Sin descripción.',
       imagenPerfil: usuarioActual.imagenPerfil || '',
-      equipo: 'RED',
       perfil: usuarioActual.perfil === 'administrador' ? 'Administrador' : 'Usuario',
       iniciales: (usuarioActual.nombre.charAt(0) + usuarioActual.apellido.charAt(0)).toUpperCase(),
     };
+
+    this.cargarPublicaciones(usuarioActual._id);
   }
 
   cerrarSesion(): void {
     this.authService.cerrarSesion();
-    this.router.navigate(['/']);
+    void this.router.navigate(['/login']);
+  }
+
+  private formatearFecha(fecha: string): string {
+    if (!fecha) {
+      return 'No disponible';
+    }
+
+    // Tomamos directamente año, mes y día para evitar el cambio
+    // de fecha que puede producir la conversión UTC/local.
+    const fechaParte = fecha.substring(0, 10);
+    const partes = fechaParte.split('-');
+
+    if (partes.length !== 3) {
+      return 'No disponible';
+    }
+
+    const [anio, mes, dia] = partes;
+
+    if (!anio || !mes || !dia) {
+      return 'No disponible';
+    }
+
+    return `${dia}/${mes}/${anio}`;
+  }
+
+  private cargarPublicaciones(usuarioId: string): void {
+    this.cargandoPublicaciones = true;
+    this.cdr.markForCheck();
+
+    this.publicacionesService.listar('fecha', 0, 3, usuarioId).subscribe({
+      next: (pagina) => {
+        this.publicaciones = pagina.items;
+        this.totalPublicaciones = pagina.total;
+        this.cargandoPublicaciones = false;
+
+        this.cdr.markForCheck();
+      },
+      error: (error: HttpErrorResponse) => {
+        this.cargandoPublicaciones = false;
+        this.mensajeError =
+          typeof error.error?.message === 'string'
+            ? error.error.message
+            : 'No se pudieron cargar tus publicaciones.';
+
+        this.cdr.markForCheck();
+      },
+    });
   }
 }

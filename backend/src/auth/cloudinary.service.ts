@@ -17,11 +17,11 @@ export class CloudinaryService {
     });
   }
 
-  async subirImagen(buffer: Buffer): Promise<string> {
+  async subirImagen(buffer: Buffer, carpeta = 'perfiles'): Promise<string> {
     return new Promise((resolve, reject) => {
       const flujo = cloudinary.uploader.upload_stream(
         {
-          folder: 'mannboard/perfiles',
+          folder: `mannboard/${carpeta}`,
           resource_type: 'image',
         },
         (error, resultado) => {

@@ -6,7 +6,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   app.enableCors({
-    origin: 'https://mannboard.vercel.app',
+    origin: ['https://mannboard.vercel.app', 'http://localhost:4200'],
   });
 
   app.useGlobalPipes(

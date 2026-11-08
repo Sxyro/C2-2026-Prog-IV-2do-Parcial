@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectorRef } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
@@ -31,6 +31,7 @@ export class RegistroComponent {
   constructor(
     private readonly http: HttpClient,
     private readonly router: Router,
+    private readonly cdr: ChangeDetectorRef,
   ) {}
 
   seleccionarImagen(event: Event): void {
@@ -40,9 +41,7 @@ export class RegistroComponent {
     this.imagenPerfil = null;
     this.mensajeError = '';
 
-    if (!archivo) {
-      return;
-    }
+    if (!archivo) return;
 
     const formatosPermitidos = ['image/jpeg', 'image/png', 'image/webp'];
 
@@ -65,9 +64,7 @@ export class RegistroComponent {
     this.mensajeError = '';
     this.mensajeExito = '';
 
-    if (this.registrando) {
-      return;
-    }
+    if (this.registrando) return;
 
     if (this.password !== this.repetirPassword) {
       this.mensajeError = 'Las contraseñas no coinciden.';
@@ -109,11 +106,13 @@ export class RegistroComponent {
       next: () => {
         this.registrando = false;
         this.mensajeExito = '¡Tu cuenta fue creada correctamente!';
+        this.cdr.detectChanges();
 
         setTimeout(() => {
           this.router.navigate(['/login']);
         }, 1800);
       },
+
       error: (error: HttpErrorResponse) => {
         this.registrando = false;
 
@@ -122,10 +121,7 @@ export class RegistroComponent {
             typeof error.error?.message === 'string'
               ? error.error.message
               : 'El correo o nombre de usuario ya está registrado.';
-          return;
-        }
-
-        if (error.status === 400) {
+        } else if (error.status === 400) {
           const mensajes = error.error?.message;
 
           this.mensajeError = Array.isArray(mensajes)
@@ -133,16 +129,14 @@ export class RegistroComponent {
             : typeof mensajes === 'string'
               ? mensajes
               : 'Revisá los datos ingresados.';
-          return;
-        }
-
-        if (error.status === 0) {
+        } else if (error.status === 0) {
           this.mensajeError =
             'No se pudo conectar con el servidor. Verificá que el backend esté funcionando.';
-          return;
+        } else {
+          this.mensajeError = error.error?.message || 'Ocurrió un error al crear tu cuenta.';
         }
 
-        this.mensajeError = error.error?.message || 'Ocurrió un error al crear tu cuenta.';
+        this.cdr.detectChanges();
       },
     });
   }

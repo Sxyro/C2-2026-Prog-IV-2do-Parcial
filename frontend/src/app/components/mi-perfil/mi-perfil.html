@@ -13,7 +13,7 @@
 
     <div class="topbar-center">
       <span class="status-dot"></span>
-      RED DE MANN CO. OPERATIVA
+      COMUNIDAD MANN CO. / MANNBOARD
     </div>
 
     <div class="profile-topbar-actions">
@@ -40,11 +40,6 @@
       <div class="sidebar-section">
         <span class="sidebar-title">CENTRO DE OPERACIONES</span>
 
-        <a class="sidebar-link" routerLink="/">
-          <span class="link-icon">⌂</span>
-          Inicio
-        </a>
-
         <a class="sidebar-link" routerLink="/publicaciones">
           <span class="link-icon">▤</span>
           Publicaciones
@@ -58,27 +53,16 @@
           <span class="link-icon">◉</span>
           Mi perfil
         </a>
-
-        <a class="sidebar-link" routerLink="/registro">
-          <span class="link-icon">＋</span>
-          Crear cuenta
-        </a>
       </div>
 
       <div class="sidebar-divider"></div>
 
-      <div class="division-card">
-        <span class="division-label">MI AFILIACIÓN</span>
-
-        <div
-          class="division-badge"
-          [class.red-badge]="usuario.equipo === 'RED'"
-          [class.blue-badge]="usuario.equipo === 'BLU'"
-        >
-          {{ usuario.equipo }}
+      <div class="account-card">
+        <span class="account-label">TIPO DE CUENTA</span>
+        <div class="account-role-badge account-badge">
+          {{ usuario.perfil }}
         </div>
-
-        <p>Tu división dentro de la comunidad.</p>
+        <p>Rol asignado a tu cuenta en MANNBOARD.</p>
       </div>
 
       <div class="sidebar-bottom">
@@ -102,23 +86,14 @@
       </div>
 
       <section class="profile-card">
-        <div
-          class="profile-banner"
-          [class.red-banner]="usuario.equipo === 'RED'"
-          [class.blue-banner]="usuario.equipo === 'BLU'"
-        >
+        <div class="profile-banner">
           <span class="banner-code">
             EXPEDIENTE DE PERSONAL / MB-{{ usuario.username.toUpperCase() }}
           </span>
-          <span class="banner-division">{{ usuario.equipo }} DIVISION</span>
         </div>
 
         <div class="profile-main">
-          <div
-            class="profile-avatar"
-            [class.red-avatar]="usuario.equipo === 'RED'"
-            [class.blue-avatar]="usuario.equipo === 'BLU'"
-          >
+          <div class="profile-avatar red-avatar">
             @if (usuario.imagenPerfil) {
               <img [src]="usuario.imagenPerfil" alt="Foto de perfil" />
             } @else {
@@ -131,32 +106,19 @@
             <h2>{{ usuario.nombre }} {{ usuario.apellido }}</h2>
             <span class="profile-username">&#64;{{ usuario.username }}</span>
           </div>
-
-          <div
-            class="profile-team"
-            [class.red-team]="usuario.equipo === 'RED'"
-            [class.blue-team]="usuario.equipo === 'BLU'"
-          >
-            {{ usuario.equipo }}
-          </div>
         </div>
 
         <p class="profile-description">{{ usuario.descripcion }}</p>
 
         <div class="profile-metrics">
           <div class="metric">
-            <strong>{{ publicaciones.length }}</strong>
+            <strong>{{ totalPublicaciones }}</strong>
             <span>PUBLICACIONES</span>
           </div>
 
           <div class="metric">
             <strong>{{ usuario.perfil }}</strong>
             <span>RANGO DE CUENTA</span>
-          </div>
-
-          <div class="metric">
-            <strong>{{ usuario.equipo }}</strong>
-            <span>DIVISIÓN</span>
           </div>
         </div>
       </section>
@@ -210,30 +172,51 @@
             <h2>Mis publicaciones</h2>
           </div>
 
-          <span class="section-code">{{ publicaciones.length }} REGISTROS</span>
+          <span class="section-code"
+            >ÚLTIMAS {{ publicaciones.length }} DE {{ totalPublicaciones }}</span
+          >
         </div>
 
+        @if (mensajeError) {
+          <p class="feed-message error-message">{{ mensajeError }}</p>
+        }
+        @if (cargandoPublicaciones) {
+          <p class="feed-message">Cargando tus publicaciones…</p>
+        }
         <div class="posts-list">
-          @for (publicacion of publicaciones; track publicacion.id) {
+          @if (!cargandoPublicaciones && publicaciones.length === 0) {
+            <p class="feed-message">Todavía no publicaste nada.</p>
+          }
+          @for (publicacion of publicaciones; track publicacion._id) {
             <article class="post-card">
-              <div class="post-category">{{ publicacion.categoria }}</div>
-
               <h3>{{ publicacion.titulo }}</h3>
-
-              <p>{{ publicacion.contenido }}</p>
+              <p>{{ publicacion.descripcion }}</p>
+              @if (publicacion.imagen) {
+                <img class="post-image" [src]="publicacion.imagen" alt="Imagen de la publicación" />
+              }
 
               <div class="post-footer">
-                <span>{{ publicacion.tiempo }}</span>
+                <span>{{ publicacion.createdAt | date: 'dd/MM/yyyy HH:mm' }}</span>
 
                 <div class="post-stats">
-                  <span>♥ {{ publicacion.likes }} ME GUSTA</span>
-                  <span>▤ {{ publicacion.comentarios }} COMENTARIOS</span>
+                  <span>♥ {{ publicacion.likesCount }} ME GUSTA</span>
+                  <span>▤ {{ publicacion.comentarios.length }} COMENTARIOS</span>
                 </div>
-
-                <span class="post-reference">
-                  MB-{{ publicacion.id.toString().padStart(3, '0') }}
-                </span>
               </div>
+              @if (publicacion.comentarios.length) {
+                <div class="comments-list">
+                  @for (
+                    comentario of publicacion.comentarios;
+                    track comentario._id ?? comentario.createdAt
+                  ) {
+                    <p>
+                      <strong>&#64;{{ comentario.username }}</strong> {{ comentario.texto }}
+                    </p>
+                  }
+                </div>
+              } @else {
+                <p class="empty-comments">Esta publicación todavía no tiene comentarios.</p>
+              }
             </article>
           }
         </div>

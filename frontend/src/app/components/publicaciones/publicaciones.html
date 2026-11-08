@@ -13,7 +13,7 @@
 
     <div class="topbar-center">
       <span class="status-dot"></span>
-      RED DE MANN CO. OPERATIVA
+      COMUNIDAD MANN CO. / MANNBOARD
     </div>
 
     @if (usuarioActual(); as usuario) {
@@ -39,11 +39,6 @@
     <aside class="sidebar">
       <div class="sidebar-section">
         <span class="sidebar-title">CENTRO DE OPERACIONES</span>
-
-        <a class="sidebar-link" routerLink="/">
-          <span class="link-icon">⌂</span>
-          Inicio
-        </a>
 
         <a class="sidebar-link active" routerLink="/publicaciones">
           <span class="link-icon">▤</span>
@@ -74,16 +69,15 @@
 
       <div class="sidebar-divider"></div>
 
-      <div class="division-card">
-        <span class="division-label">AFILIACIÓN</span>
-
-        <div class="division-badges">
-          <span class="red-badge">RED</span>
-          <span class="blue-badge">BLU</span>
+      @if (usuarioActual(); as usuario) {
+        <div class="account-card">
+          <span class="account-label">TIPO DE CUENTA</span>
+          <div class="account-badges account-role">
+            {{ usuario.perfil === 'administrador' ? 'ADMINISTRADOR' : 'USUARIO' }}
+          </div>
+          <p>Rol asignado a tu cuenta en MANNBOARD.</p>
         </div>
-
-        <p>Elegí tu bando. Encontrá tu comunidad.</p>
-      </div>
+      }
 
       <div class="sidebar-bottom">
         <span>MANN CO. / 1946</span>
@@ -101,7 +95,7 @@
 
         <div class="network-indicator">
           <span class="status-dot"></span>
-          RED CONECTADA
+          COMUNIDAD ACTIVA
         </div>
       </div>
 
@@ -112,63 +106,98 @@
             <h2>Actividad reciente</h2>
           </div>
 
-          <span class="post-count"> {{ publicaciones.length }} PUBLICACIONES </span>
+          <label class="sort-control">
+            Ordenar por
+            <select [ngModel]="orden" (ngModelChange)="cambiarOrden($event)">
+              <option value="fecha">Más recientes</option>
+              <option value="likes">Más me gusta</option>
+            </select>
+          </label>
         </div>
+
+        @if (usuarioActual()) {
+          <form class="create-post" (ngSubmit)="crearPublicacion()">
+            <span class="section-label">NUEVA TRANSMISIÓN</span>
+
+            <input
+              name="titulo"
+              [(ngModel)]="titulo"
+              maxlength="120"
+              placeholder="Título de la publicación"
+              required
+            />
+
+            <textarea
+              name="descripcion"
+              [(ngModel)]="descripcion"
+              maxlength="3000"
+              placeholder="¿Qué querés compartir con la comunidad?"
+              required
+            ></textarea>
+
+            <div class="create-post-actions">
+              <label>
+                Imagen (opcional)
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  (change)="seleccionarImagen($event)"
+                />
+              </label>
+
+              <button type="submit" [disabled]="guardando">
+                {{ guardando ? 'PUBLICANDO…' : 'PUBLICAR' }}
+              </button>
+            </div>
+          </form>
+        } @else {
+          <p class="login-hint"><a routerLink="/login">Ingresá</a> para publicar y dar me gusta.</p>
+        }
+
+        @if (mensajeError) {
+          <p class="feed-message error-message">{{ mensajeError }}</p>
+        }
+
+        @if (mensajeExito) {
+          <p class="feed-message success-message">{{ mensajeExito }}</p>
+        }
+
+        <div class="post-count">{{ total }} PUBLICACIONES</div>
 
         <div class="posts-list">
-          @for (publicacion of publicaciones; track publicacion.id) {
-            <article class="post-card">
-              <div class="post-header">
-                <div
-                  class="user-avatar"
-                  [class.red-avatar]="publicacion.equipo === 'RED'"
-                  [class.blue-avatar]="publicacion.equipo === 'BLU'"
-                >
-                  {{ publicacion.iniciales }}
-                </div>
+          @if (cargando) {
+            <p class="feed-message">Cargando publicaciones…</p>
+          } @else if (publicaciones.length === 0) {
+            <p class="feed-message">Todavía no hay publicaciones para mostrar.</p>
+          }
 
-                <div class="user-info">
-                  <span class="user-name">{{ publicacion.usuario }}</span>
-                  <span class="user-alias">{{ publicacion.alias }}</span>
-                </div>
-
-                <div
-                  class="team-label"
-                  [class.red-team]="publicacion.equipo === 'RED'"
-                  [class.blue-team]="publicacion.equipo === 'BLU'"
-                >
-                  {{ publicacion.equipo }}
-                </div>
-
-                <span class="post-time">{{ publicacion.tiempo }}</span>
-              </div>
-
-              <div class="post-content">
-                <span class="post-category">{{ publicacion.categoria }}</span>
-
-                <h3>{{ publicacion.titulo }}</h3>
-
-                <p>{{ publicacion.contenido }}</p>
-              </div>
-
-              <div class="post-footer">
-                <div class="post-stat">
-                  <span>♥</span>
-                  {{ publicacion.likes }} ME GUSTA
-                </div>
-
-                <div class="post-stat">
-                  <span>▤</span>
-                  {{ publicacion.comentarios }} COMENTARIOS
-                </div>
-
-                <span class="post-reference">
-                  MB-{{ publicacion.id.toString().padStart(3, '0') }}
-                </span>
-              </div>
-            </article>
+          @for (publicacion of publicaciones; track publicacion._id) {
+            <app-publicacion-item
+              [publicacion]="publicacion"
+              [puedeEliminar]="puedeEliminar(publicacion)"
+              [usuarioAutenticado]="!!usuarioActual()"
+              [likeEnProceso]="likesEnProceso.has(publicacion._id)"
+              (solicitarLike)="alternarLike($event)"
+              (solicitarEliminar)="eliminar($event)"
+            />
           }
         </div>
+
+        <nav class="pagination" aria-label="Paginación de publicaciones">
+          <button type="button" [disabled]="offset === 0 || cargando" (click)="cambiarPagina(-1)">
+            ← Anterior
+          </button>
+
+          <span>Página {{ paginaActual }} de {{ paginasTotales }}</span>
+
+          <button
+            type="button"
+            [disabled]="offset + limite >= total || cargando"
+            (click)="cambiarPagina(1)"
+          >
+            Siguiente →
+          </button>
+        </nav>
       </section>
 
       <div class="feed-end">
@@ -180,40 +209,71 @@
 
     <aside class="right-panel">
       <section class="panel-card">
-        <span class="panel-label">ESTADO DE LA RED</span>
+        <span class="panel-label">ACTIVIDAD DE LA COMUNIDAD</span>
+
         <div class="online-status">
           <span class="status-dot"></span>
-          <strong>EN LÍNEA</strong>
+          <strong>FEED DE PUBLICACIONES</strong>
         </div>
-        <p>La comunidad está operativa.</p>
+
+        <p>Publicaciones compartidas por los usuarios.</p>
+
         <div class="panel-divider"></div>
+
         <div class="network-stat">
           <span>Publicaciones visibles</span>
-          <strong>{{ publicaciones.length }}</strong>
+          <strong>{{ total }}</strong>
         </div>
       </section>
 
       <section class="panel-card">
-        <span class="panel-label">DIVISIONES ACTIVAS</span>
-
-        <div class="team-row">
-          <span class="team-square red-square"></span>
-          <span>División RED</span>
-          <strong>RED</strong>
-        </div>
-
-        <div class="team-row">
-          <span class="team-square blue-square"></span>
-          <span>División BLU</span>
-          <strong>BLU</strong>
-        </div>
-      </section>
-
-      <section class="panel-card quote-card">
-        <span class="panel-label">MENSAJE DE MANN CO.</span>
-        <p>"Una comunidad es tan fuerte como las personas que la integran."</p>
-        <span class="quote-author">— DIRECCIÓN MANN CO.</span>
+        <span class="panel-label">SOBRE MANNBOARD</span>
+        <p>Un espacio para compartir ideas, publicaciones y conversar con la comunidad.</p>
       </section>
     </aside>
   </div>
 </div>
+
+@if (publicacionAEliminar) {
+  <div class="modal-overlay" (click)="cancelarEliminacion()">
+    <section
+      class="delete-modal"
+      role="alertdialog"
+      aria-modal="true"
+      aria-labelledby="delete-modal-title"
+      (click)="$event.stopPropagation()"
+    >
+      <div class="modal-icon">!</div>
+
+      <span class="modal-eyebrow">CONFIRMAR ACCIÓN</span>
+
+      <h2 id="delete-modal-title">¿ELIMINAR PUBLICACIÓN?</h2>
+
+      <p>
+        Estás por eliminar
+        <strong>{{ publicacionAEliminar.titulo }}</strong
+        >. Esta acción no se puede deshacer.
+      </p>
+
+      <div class="modal-actions">
+        <button
+          class="modal-cancel"
+          type="button"
+          [disabled]="eliminando"
+          (click)="cancelarEliminacion()"
+        >
+          CANCELAR
+        </button>
+
+        <button
+          class="modal-confirm"
+          type="button"
+          [disabled]="eliminando"
+          (click)="confirmarEliminacion()"
+        >
+          {{ eliminando ? 'ELIMINANDO...' : 'SÍ, ELIMINAR' }}
+        </button>
+      </div>
+    </section>
+  </div>
+}

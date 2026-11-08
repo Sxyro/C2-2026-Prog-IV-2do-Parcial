@@ -1,0 +1,64 @@
+<article class="post-card">
+  <div class="post-header">
+    @if (publicacion.usuario.imagenPerfil) {
+      <img
+        class="user-avatar post-avatar-image"
+        [src]="publicacion.usuario.imagenPerfil"
+        alt="Foto de perfil"
+      />
+    } @else {
+      <div class="user-avatar">
+        {{ publicacion.usuario.nombre.charAt(0) }}{{ publicacion.usuario.apellido.charAt(0) }}
+      </div>
+    }
+
+    <div class="user-info">
+      <span class="user-name">
+        {{ publicacion.usuario.nombre }} {{ publicacion.usuario.apellido }}
+      </span>
+      <span class="user-alias">&#64;{{ publicacion.usuario.username }}</span>
+    </div>
+
+    <span class="post-time">
+      {{ publicacion.createdAt | date: 'dd/MM/yyyy HH:mm' }}
+    </span>
+
+    @if (puedeEliminar) {
+      <button class="delete-post" type="button" (click)="eliminar()">ELIMINAR</button>
+    }
+  </div>
+
+  <div class="post-content">
+    <h3>{{ publicacion.titulo }}</h3>
+    <p>{{ publicacion.descripcion }}</p>
+
+    @if (publicacion.imagen) {
+      <img class="post-image" [src]="publicacion.imagen" alt="Imagen de la publicación" />
+    }
+  </div>
+
+  <div class="post-footer">
+    <button
+      class="post-action"
+      [class.liked]="publicacion.likedByMe"
+      [disabled]="!usuarioAutenticado || likeEnProceso"
+      type="button"
+      (click)="darLike()"
+    >
+      ♥ {{ publicacion.likesCount }} ME GUSTA
+    </button>
+
+    <span class="post-stat"> ▤ {{ publicacion.comentarios.length }} COMENTARIOS </span>
+  </div>
+
+  @if (publicacion.comentarios.length) {
+    <div class="comments-list">
+      @for (comentario of publicacion.comentarios; track comentario._id ?? comentario.createdAt) {
+        <p>
+          <strong>&#64;{{ comentario.username }}</strong>
+          {{ comentario.texto }}
+        </p>
+      }
+    </div>
+  }
+</article>

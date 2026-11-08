@@ -1,5 +1,20 @@
-/* You can add global styles to this file, and also import other style files */
 @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800;900&family=Barlow:wght@400;500;600;700;800&display=swap');
+
+:root {
+  font-family: 'Barlow', sans-serif;
+  color: #e7e2d7;
+  background: #202120;
+
+  --color-background: #202120;
+  --color-surface: #292a29;
+  --color-surface-alt: #222321;
+  --color-primary: #a8322b;
+  --color-primary-hover: #c13c33;
+  --color-beige: #d6c6a3;
+  --color-text: #e7e2d7;
+  --color-muted: #aaa79d;
+  --color-border: rgba(214, 198, 163, 0.15);
+}
 
 * {
   box-sizing: border-box;
@@ -12,11 +27,32 @@ body {
 }
 
 body {
+  min-width: 320px;
   font-family: 'Barlow', sans-serif;
-  background: #d5d0c5;
+  background: var(--color-background);
+  color: var(--color-text);
 }
 
 button,
-input {
+input,
+textarea,
+select {
   font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: default;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+img {
+  max-width: 100%;
 }

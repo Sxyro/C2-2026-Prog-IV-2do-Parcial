@@ -13,6 +13,7 @@ export interface UsuarioAutenticado {
   descripcion: string;
   imagenPerfil: string;
   perfil: 'usuario' | 'administrador';
+  accessToken?: string;
 }
 
 @Injectable({
@@ -47,6 +48,10 @@ export class AuthService {
     return this.usuarioSignal();
   }
 
+  obtenerToken(): string | null {
+    return this.usuarioSignal()?.accessToken ?? null;
+  }
+
   cerrarSesion(): void {
     localStorage.removeItem(this.claveUsuario);
     this.usuarioSignal.set(null);
@@ -64,7 +69,14 @@ export class AuthService {
     }
 
     try {
-      return JSON.parse(usuarioGuardado) as UsuarioAutenticado;
+      const usuario = JSON.parse(usuarioGuardado) as UsuarioAutenticado;
+
+      if (!usuario.accessToken) {
+        localStorage.removeItem(this.claveUsuario);
+        return null;
+      }
+
+      return usuario;
     } catch {
       localStorage.removeItem(this.claveUsuario);
       return null;

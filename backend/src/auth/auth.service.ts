@@ -8,12 +8,14 @@ import { UsuariosService } from '../usuarios/usuarios.service';
 import { RegistroDto } from './dto/registro.dto';
 import { LoginDto } from './dto/login.dto';
 import { CloudinaryService } from './cloudinary.service';
+import { SessionService } from './session.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly usuariosService: UsuariosService,
     private readonly cloudinaryService: CloudinaryService,
+    private readonly sessionService: SessionService,
   ) {}
 
   async registrar(datos: RegistroDto, imagenPerfil?: Express.Multer.File) {
@@ -56,7 +58,7 @@ export class AuthService {
         perfil: 'usuario',
       });
 
-      const { password, ...usuarioSeguro } = usuario.toObject();
+      const { password: _password, ...usuarioSeguro } = usuario.toObject();
 
       return usuarioSeguro;
     } catch (error: unknown) {
@@ -93,8 +95,11 @@ export class AuthService {
       throw new UnauthorizedException('Credenciales incorrectas');
     }
 
-    const { password, ...usuarioSeguro } = usuario.toObject();
+    const { password: _password, ...usuarioSeguro } = usuario.toObject();
 
-    return usuarioSeguro;
+    return {
+      ...usuarioSeguro,
+      accessToken: this.sessionService.createToken(String(usuario._id)),
+    };
   }
 }
