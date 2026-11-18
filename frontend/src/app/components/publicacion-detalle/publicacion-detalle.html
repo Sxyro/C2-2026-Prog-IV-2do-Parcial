@@ -1,0 +1,160 @@
+<main class="detail-page">
+  <header class="detail-header">
+    <a class="back-link" routerLink="/publicaciones">← VOLVER A PUBLICACIONES</a>
+    <a class="detail-brand" routerLink="/publicaciones">
+      <span class="detail-brand-emblem">M</span>
+      <span>MANNBOARD</span>
+    </a>
+  </header>
+
+  <section class="detail-content">
+    <span class="detail-eyebrow">MANN CO. / TRANSMISIÓN</span>
+
+    @if (cargandoPublicacion) {
+      <p class="detail-message">Cargando publicación…</p>
+    } @else if (publicacion) {
+      <article class="detail-post">
+        <div class="detail-post-meta">
+          <div class="detail-author">
+            @if (publicacion.usuario.imagenPerfil) {
+              <img [src]="publicacion.usuario.imagenPerfil" alt="" />
+            } @else {
+              <span class="detail-avatar">
+                {{ publicacion.usuario.nombre.charAt(0) }}{{ publicacion.usuario.apellido.charAt(0) }}
+              </span>
+            }
+            <div>
+              <strong>{{ publicacion.usuario.nombre }} {{ publicacion.usuario.apellido }}</strong>
+              <span>&#64;{{ publicacion.usuario.username }}</span>
+            </div>
+          </div>
+          <time>{{ publicacion.createdAt | date: 'dd/MM/yyyy HH:mm' }}</time>
+        </div>
+
+        <h1>{{ publicacion.titulo }}</h1>
+        <p class="detail-description">{{ publicacion.descripcion }}</p>
+        @if (publicacion.imagen) {
+          <img
+            class="detail-image"
+            [src]="publicacion.imagen"
+            alt="Imagen de la publicación"
+          />
+        }
+        <div class="detail-comment-count">
+          ▤ {{ totalComentarios }} COMENTARIOS
+        </div>
+      </article>
+
+      <section class="comments-section" aria-labelledby="comments-title">
+        <div class="comments-heading">
+          <div>
+            <span class="detail-eyebrow">CONVERSACIÓN</span>
+            <h2 id="comments-title">Comentarios</h2>
+          </div>
+          <span>{{ totalComentarios }} en total</span>
+        </div>
+
+        @if (usuarioActual()) {
+          <form class="comment-form" (ngSubmit)="crearComentario()">
+            <label for="nuevo-comentario">Sumate a la conversación</label>
+            <textarea
+              id="nuevo-comentario"
+              name="textoComentario"
+              [(ngModel)]="textoComentario"
+              maxlength="500"
+              required
+              placeholder="Escribí tu comentario…"
+            ></textarea>
+            <button type="submit" [disabled]="guardandoComentario || !textoComentario.trim()">
+              {{ guardandoComentario ? 'PUBLICANDO…' : 'COMENTAR' }}
+            </button>
+          </form>
+        } @else {
+          <p class="detail-login-hint">
+            <a routerLink="/login">Iniciá sesión</a> para escribir un comentario.
+          </p>
+        }
+
+        @if (mensajeError) {
+          <p class="detail-message detail-error" role="alert">{{ mensajeError }}</p>
+        }
+
+        <div class="comment-list">
+          @for (comentario of comentarios; track comentario._id) {
+            <article class="comment-item">
+              <div class="comment-meta">
+                <div class="comment-author">
+                  @if (comentario.imagenPerfil) {
+                    <img [src]="comentario.imagenPerfil" alt="" />
+                  } @else {
+                    <span class="comment-avatar">
+                      {{ comentario.username.charAt(0).toUpperCase() }}
+                    </span>
+                  }
+                  <strong>&#64;{{ comentario.username }}</strong>
+                </div>
+                <div class="comment-meta-actions">
+                  <time>{{ comentario.createdAt | date: 'dd/MM/yyyy HH:mm' }}</time>
+                  @if (comentarioEditandoId !== comentario._id && esPropio(comentario)) {
+                    <button
+                      type="button"
+                      class="edit-comment-button"
+                      (click)="editarComentario(comentario)"
+                    >
+                      <span aria-hidden="true">✎</span>
+                      Editar
+                    </button>
+                  }
+                </div>
+              </div>
+
+              @if (comentarioEditandoId === comentario._id) {
+                <form class="comment-edit-form" (ngSubmit)="guardarEdicion(comentario)">
+                  <textarea
+                    [name]="'edicion-' + comentario._id"
+                    [(ngModel)]="textoEdicion"
+                    maxlength="500"
+                    required
+                  ></textarea>
+                  <div>
+                    <button type="button" class="secondary-button" (click)="cancelarEdicion()">
+                      CANCELAR
+                    </button>
+                    <button type="submit" [disabled]="guardandoComentario || !textoEdicion.trim()">
+                      GUARDAR
+                    </button>
+                  </div>
+                </form>
+              } @else {
+                <p>{{ comentario.texto }}</p>
+                @if (comentario.modificado) {
+                  <span class="edited-label">EDITADO</span>
+                }
+              }
+            </article>
+          } @empty {
+            @if (!cargandoComentarios) {
+              <p class="detail-message">Todavía no hay comentarios. ¡Sé el primero!</p>
+            }
+          }
+        </div>
+
+        @if (cargandoComentarios) {
+          <p class="detail-message">Cargando comentarios…</p>
+        }
+        @if (hayMasComentarios) {
+          <button
+            type="button"
+            class="load-more-button"
+            [disabled]="cargandoComentarios"
+            (click)="cargarMasComentarios()"
+          >
+            {{ cargandoComentarios ? 'CARGANDO…' : 'CARGAR MÁS COMENTARIOS' }}
+          </button>
+        }
+      </section>
+    } @else if (mensajeError) {
+      <p class="detail-message detail-error" role="alert">{{ mensajeError }}</p>
+    }
+  </section>
+</main>

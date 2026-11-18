@@ -79,10 +79,16 @@
           <p>Tu identidad y actividad dentro de MANNBOARD.</p>
         </div>
 
-        <span class="profile-status">
-          <span class="status-dot"></span>
-          PERFIL ACTIVO
-        </span>
+        <div class="profile-heading-actions">
+          <span class="profile-status">
+            <span class="status-dot"></span>
+            PERFIL ACTIVO
+          </span>
+
+          <button class="edit-profile-button" type="button" (click)="abrirEdicion()">
+            ✎ EDITAR PERFIL
+          </button>
+        </div>
       </div>
 
       <section class="profile-card">
@@ -172,55 +178,220 @@
             <h2>Mis publicaciones</h2>
           </div>
 
-          <span class="section-code"
-            >ÚLTIMAS {{ publicaciones.length }} DE {{ totalPublicaciones }}</span
-          >
+          <span class="section-code">
+            ÚLTIMAS {{ publicaciones.length }} DE {{ totalPublicaciones }}
+          </span>
         </div>
 
         @if (mensajeError) {
           <p class="feed-message error-message">{{ mensajeError }}</p>
         }
+
         @if (cargandoPublicaciones) {
           <p class="feed-message">Cargando tus publicaciones…</p>
         }
+
         <div class="posts-list">
           @if (!cargandoPublicaciones && publicaciones.length === 0) {
             <p class="feed-message">Todavía no publicaste nada.</p>
           }
+
           @for (publicacion of publicaciones; track publicacion._id) {
             <article class="post-card">
               <h3>{{ publicacion.titulo }}</h3>
               <p>{{ publicacion.descripcion }}</p>
+
               @if (publicacion.imagen) {
                 <img class="post-image" [src]="publicacion.imagen" alt="Imagen de la publicación" />
               }
 
               <div class="post-footer">
-                <span>{{ publicacion.createdAt | date: 'dd/MM/yyyy HH:mm' }}</span>
+                <span>
+                  {{ publicacion.createdAt | date: 'dd/MM/yyyy HH:mm' }}
+                </span>
 
                 <div class="post-stats">
                   <span>♥ {{ publicacion.likesCount }} ME GUSTA</span>
-                  <span>▤ {{ publicacion.comentarios.length }} COMENTARIOS</span>
+                  <span>▤ {{ publicacion.comentariosCount ?? 0 }} COMENTARIOS</span>
                 </div>
               </div>
-              @if (publicacion.comentarios.length) {
-                <div class="comments-list">
-                  @for (
-                    comentario of publicacion.comentarios;
-                    track comentario._id ?? comentario.createdAt
-                  ) {
-                    <p>
-                      <strong>&#64;{{ comentario.username }}</strong> {{ comentario.texto }}
-                    </p>
-                  }
-                </div>
-              } @else {
-                <p class="empty-comments">Esta publicación todavía no tiene comentarios.</p>
-              }
             </article>
           }
         </div>
       </section>
     </main>
   </div>
+
+
+  @if (mostrarModalEdicion) {
+    <div class="profile-modal-overlay" (click)="cerrarEdicion()">
+      <section
+        class="profile-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="edit-profile-title"
+        (click)="$event.stopPropagation()"
+      >
+        <div class="profile-modal-header">
+          <div>
+            <span class="section-label">MANN CO. / PERSONAL</span>
+            <h2 id="edit-profile-title">Editar mi perfil</h2>
+            <p>Modificá la información de tu cuenta.</p>
+          </div>
+
+          <button
+            class="modal-close-button"
+            type="button"
+            aria-label="Cerrar"
+            (click)="cerrarEdicion()"
+          >
+            ×
+          </button>
+        </div>
+
+        <form class="profile-edit-form" (ngSubmit)="guardarCambios()">
+          <div class="edit-avatar-section">
+            <div class="edit-avatar-preview">
+              @if (imagenPreview || usuario.imagenPerfil) {
+                <img
+                  [src]="imagenPreview || usuario.imagenPerfil"
+                  alt="Vista previa de la foto de perfil"
+                />
+              } @else {
+                {{ usuario.iniciales }}
+              }
+            </div>
+
+            <div class="edit-avatar-info">
+              <strong>FOTO DE PERFIL</strong>
+              <span>JPG, PNG o WEBP. Máximo 5 MB.</span>
+
+              <label class="image-upload-button">
+                SELECCIONAR IMAGEN
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  (change)="seleccionarImagen($event)"
+                />
+              </label>
+            </div>
+          </div>
+
+          <div class="edit-fields-grid">
+            <label class="edit-field">
+              <span>NOMBRE</span>
+              <input
+                type="text"
+                name="nombre"
+                [(ngModel)]="datosEdicion.nombre"
+                maxlength="50"
+                required
+              />
+            </label>
+
+            <label class="edit-field">
+              <span>APELLIDO</span>
+              <input
+                type="text"
+                name="apellido"
+                [(ngModel)]="datosEdicion.apellido"
+                maxlength="50"
+                required
+              />
+            </label>
+
+            <label class="edit-field">
+              <span>NOMBRE DE USUARIO</span>
+              <input
+                type="text"
+                name="username"
+                [(ngModel)]="datosEdicion.username"
+                minlength="3"
+                maxlength="30"
+                required
+              />
+            </label>
+
+            <label class="edit-field">
+              <span>CORREO ELECTRÓNICO</span>
+              <input
+                type="email"
+                name="email"
+                [(ngModel)]="datosEdicion.email"
+                maxlength="100"
+                required
+              />
+            </label>
+
+            <label class="edit-field">
+              <span>FECHA DE NACIMIENTO</span>
+              <input
+                type="date"
+                name="fechaNacimiento"
+                [(ngModel)]="datosEdicion.fechaNacimiento"
+                required
+              />
+            </label>
+
+            <label class="edit-field edit-field-full">
+              <span>DESCRIPCIÓN</span>
+              <textarea
+                name="descripcion"
+                [(ngModel)]="datosEdicion.descripcion"
+                maxlength="250"
+                rows="4"
+                placeholder="Contá algo sobre vos..."
+              ></textarea>
+              <small>{{ datosEdicion.descripcion.length }}/250 caracteres</small>
+            </label>
+          </div>
+
+          @if (errorEdicion) {
+            <p class="edit-error-message">{{ errorEdicion }}</p>
+          }
+
+          <div class="profile-modal-actions">
+            <button
+              class="modal-cancel-button"
+              type="button"
+              (click)="cerrarEdicion()"
+              [disabled]="guardandoCambios"
+            >
+              CANCELAR
+            </button>
+
+            <button class="modal-save-button" type="submit" [disabled]="guardandoCambios">
+              @if (guardandoCambios) {
+                GUARDANDO...
+              } @else {
+                GUARDAR CAMBIOS
+              }
+            </button>
+          </div>
+        </form>
+      </section>
+    </div>
+  }
+
+  <!-- MODAL DE CONFIRMACIÓN -->
+  @if (mostrarModalResultado) {
+    <div class="profile-modal-overlay" (click)="cerrarModalResultado()">
+      <section
+        class="profile-result-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="result-title"
+        (click)="$event.stopPropagation()"
+      >
+        <div class="result-icon">✓</div>
+        <span class="section-label">MANN CO. / SISTEMA</span>
+        <h2 id="result-title">PERFIL ACTUALIZADO</h2>
+        <p>{{ mensajeResultado }}</p>
+
+        <button class="modal-save-button" type="button" (click)="cerrarModalResultado()">
+          CONTINUAR
+        </button>
+      </section>
+    </div>
+  }
 </div>

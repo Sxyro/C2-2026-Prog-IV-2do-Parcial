@@ -3,8 +3,10 @@ import { HydratedDocument, Schema as MongooseSchema, Types } from 'mongoose';
 
 export type PublicacionDocument = HydratedDocument<Publicacion>;
 
-@Schema({ _id: false })
+@Schema()
 export class Comentario {
+  _id: Types.ObjectId;
+
   @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'Usuario', required: true })
   usuario: Types.ObjectId;
 
@@ -16,6 +18,9 @@ export class Comentario {
 
   @Prop({ default: Date.now })
   createdAt: Date;
+
+  @Prop({ default: false })
+  modificado: boolean;
 }
 
 export const ComentarioSchema = SchemaFactory.createForClass(Comentario);

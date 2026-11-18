@@ -1,4 +1,3 @@
-import { DatePipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -11,7 +10,7 @@ import { finalize } from 'rxjs';
 @Component({
   selector: 'app-publicaciones',
   standalone: true,
-  imports: [DatePipe, FormsModule, RouterLink, PublicacionComponent],
+  imports: [FormsModule, RouterLink, PublicacionComponent],
   templateUrl: './publicaciones.html',
   styleUrl: './publicaciones.scss',
 })

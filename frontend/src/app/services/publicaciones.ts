@@ -13,10 +13,13 @@ export interface UsuarioPublicacion {
 }
 
 export interface ComentarioPublicacion {
-  _id?: string;
+  _id: string;
+  usuario: string;
   username: string;
+  imagenPerfil: string;
   texto: string;
   createdAt: string;
+  modificado: boolean;
 }
 
 export interface Publicacion {
@@ -28,7 +31,15 @@ export interface Publicacion {
   likesCount: number;
   likedByMe: boolean;
   comentarios: ComentarioPublicacion[];
+  comentariosCount?: number;
   createdAt: string;
+}
+
+export interface PaginaComentarios {
+  items: ComentarioPublicacion[];
+  total: number;
+  offset: number;
+  limit: number;
 }
 
 export interface PaginaPublicaciones {
@@ -66,6 +77,47 @@ export class PublicacionesService {
       params,
       headers: this.headers(false),
     });
+  }
+
+  obtener(id: string): Observable<Publicacion> {
+    return this.http.get<Publicacion>(`${this.apiUrl}/${id}`, {
+      headers: this.headers(false),
+    });
+  }
+
+  listarComentarios(
+    publicacionId: string,
+    offset: number,
+    limit: number,
+  ): Observable<PaginaComentarios> {
+    const params = new HttpParams().set('offset', offset).set('limit', limit);
+    return this.http.get<PaginaComentarios>(
+      `${this.apiUrl}/${publicacionId}/comentarios`,
+      { params },
+    );
+  }
+
+  crearComentario(
+    publicacionId: string,
+    texto: string,
+  ): Observable<ComentarioPublicacion> {
+    return this.http.post<ComentarioPublicacion>(
+      `${this.apiUrl}/${publicacionId}/comentarios`,
+      { texto },
+      { headers: this.headers() },
+    );
+  }
+
+  actualizarComentario(
+    publicacionId: string,
+    comentarioId: string,
+    texto: string,
+  ): Observable<ComentarioPublicacion> {
+    return this.http.put<ComentarioPublicacion>(
+      `${this.apiUrl}/${publicacionId}/comentarios/${comentarioId}`,
+      { texto },
+      { headers: this.headers() },
+    );
   }
 
   crear(formulario: FormData): Observable<Publicacion> {

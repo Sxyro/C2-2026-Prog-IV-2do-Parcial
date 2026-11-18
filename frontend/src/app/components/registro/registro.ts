@@ -1,8 +1,8 @@
 import { Component, ChangeDetectorRef } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { environment } from '../../../environments/environment';
+import { HttpErrorResponse } from '@angular/common/http';
+import { AuthService } from '../../services/auth';
 
 @Component({
   selector: 'app-registro',
@@ -26,10 +26,8 @@ export class RegistroComponent {
   mensajeExito = '';
   registrando = false;
 
-  private readonly apiUrl = `${environment.apiUrl}/register`;
-
   constructor(
-    private readonly http: HttpClient,
+    private readonly authService: AuthService,
     private readonly router: Router,
     private readonly cdr: ChangeDetectorRef,
   ) {}
@@ -102,15 +100,15 @@ export class RegistroComponent {
 
     this.registrando = true;
 
-    this.http.post(this.apiUrl, formulario).subscribe({
+    this.authService.registrar(formulario).subscribe({
       next: () => {
         this.registrando = false;
         this.mensajeExito = '¡Tu cuenta fue creada correctamente!';
         this.cdr.detectChanges();
 
         setTimeout(() => {
-          this.router.navigate(['/login']);
-        }, 1800);
+          this.router.navigate(['/publicaciones']);
+        }, 800);
       },
 
       error: (error: HttpErrorResponse) => {

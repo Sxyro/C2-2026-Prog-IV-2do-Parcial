@@ -60,7 +60,7 @@ export class LoginComponent {
           this.changeDetector.markForCheck();
 
           setTimeout(() => {
-            this.router.navigate(['/mi-perfil']);
+            this.router.navigate(['/publicaciones']);
           }, 800);
         },
         error: (error: HttpErrorResponse) => {

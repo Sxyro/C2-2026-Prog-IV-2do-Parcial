@@ -1,65 +1,54 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { createHmac, timingSafeEqual } from 'node:crypto';
+import { JwtService } from '@nestjs/jwt';
 
 interface SessionPayload {
   sub: string;
+  email: string;
+  username: string;
+  rol: 'usuario' | 'administrador';
   exp: number;
+  iat?: number;
+}
+
+export interface SessionIdentity {
+  id: string;
+  email: string;
+  username: string;
+  perfil: 'usuario' | 'administrador';
 }
 
 @Injectable()
 export class SessionService {
-  private readonly secret: string;
+  static readonly tokenTtlSeconds = 3 * 60;
 
-  constructor(configService: ConfigService) {
-    this.secret = configService.getOrThrow<string>('AUTH_TOKEN_SECRET');
+  constructor(private readonly jwtService: JwtService) {}
 
-    if (this.secret.length < 32) {
-      throw new Error('AUTH_TOKEN_SECRET debe tener al menos 32 caracteres');
-    }
+  createToken(identity: SessionIdentity): string {
+    return this.jwtService.sign({
+      sub: identity.id,
+      email: identity.email,
+      username: identity.username,
+      rol: identity.perfil,
+    });
   }
 
-  createToken(userId: string): string {
-    const payload: SessionPayload = {
-      sub: userId,
-      exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 7,
-    };
-    const encodedPayload = Buffer.from(JSON.stringify(payload)).toString(
-      'base64url',
-    );
-
-    return `${encodedPayload}.${this.sign(encodedPayload)}`;
+  refreshToken(token: string): string {
+    const { exp: _exp, iat: _iat, ...identity } = this.verifyToken(token);
+    return this.jwtService.sign(identity);
   }
 
   verifyToken(token: string): SessionPayload {
-    const [encodedPayload, signature, extra] = token.split('.');
-
-    if (!encodedPayload || !signature || extra) {
-      throw new UnauthorizedException('Token inválido');
-    }
-
-    const expectedSignature = this.sign(encodedPayload);
-    const actual = Buffer.from(signature);
-    const expected = Buffer.from(expectedSignature);
-
-    if (
-      actual.length !== expected.length ||
-      !timingSafeEqual(actual, expected)
-    ) {
-      throw new UnauthorizedException('Token inválido');
-    }
-
     try {
-      const payload = JSON.parse(
-        Buffer.from(encodedPayload, 'base64url').toString('utf8'),
-      ) as SessionPayload;
+      const payload = this.jwtService.verify<SessionPayload>(token);
 
       if (
         typeof payload.sub !== 'string' ||
-        typeof payload.exp !== 'number' ||
-        payload.exp <= Math.floor(Date.now() / 1000)
+        typeof payload.email !== 'string' ||
+        typeof payload.username !== 'string' ||
+        !['usuario', 'administrador'].includes(payload.rol) ||
+        typeof payload.exp !== 'number'
       ) {
-        throw new UnauthorizedException('La sesión expiró');
+        throw new UnauthorizedException('Token inválido');
       }
 
       return payload;
@@ -68,13 +57,20 @@ export class SessionService {
         throw error;
       }
 
-      throw new UnauthorizedException('Token inválido');
-    }
-  }
+      if (
+        error instanceof Error &&
+        ['JsonWebTokenError', 'TokenExpiredError', 'NotBeforeError'].includes(
+          error.name,
+        )
+      ) {
+        throw new UnauthorizedException(
+          error.name === 'TokenExpiredError'
+            ? 'La sesión expiró'
+            : 'Token inválido',
+        );
+      }
 
-  private sign(payload: string): string {
-    return createHmac('sha256', this.secret)
-      .update(payload)
-      .digest('base64url');
+      throw error;
+    }
   }
 }

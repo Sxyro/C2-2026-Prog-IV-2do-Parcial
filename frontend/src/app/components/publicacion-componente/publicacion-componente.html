@@ -48,7 +48,9 @@
       ♥ {{ publicacion.likesCount }} ME GUSTA
     </button>
 
-    <span class="post-stat"> ▤ {{ publicacion.comentarios.length }} COMENTARIOS </span>
+    <a class="post-stat" [routerLink]="['/publicaciones', publicacion._id]">
+      ▤ {{ publicacion.comentariosCount ?? publicacion.comentarios.length }} COMENTARIOS · VER
+    </a>
   </div>
 
   @if (publicacion.comentarios.length) {

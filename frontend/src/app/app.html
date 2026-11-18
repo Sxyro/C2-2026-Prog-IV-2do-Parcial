@@ -1,1 +1,37 @@
-<router-outlet />
+@if (cargando) {
+  <main class="startup-screen" aria-live="polite">
+    <span class="startup-spinner" aria-hidden="true"></span>
+    <p>Validando sesión…</p>
+  </main>
+} @else if (mensajeErrorValidacion) {
+  <main class="startup-screen">
+    <p role="alert">{{ mensajeErrorValidacion }}</p>
+    <button type="button" (click)="validarSesion()">REINTENTAR</button>
+  </main>
+} @else {
+  <router-outlet />
+}
+
+@if (authService.mostrarAdvertenciaSesion()) {
+  <div class="session-modal-overlay">
+    <section
+      class="session-modal"
+      role="alertdialog"
+      aria-modal="true"
+      aria-labelledby="session-modal-title"
+    >
+      <span class="session-modal-eyebrow">SESIÓN PRÓXIMA A VENCER</span>
+      <h2 id="session-modal-title">¿Querés extender tu sesión?</h2>
+      <p>Tu sesión vence en aproximadamente 2 minutos.</p>
+      @if (mensajeErrorExtension) {
+        <p role="alert">{{ mensajeErrorExtension }}</p>
+      }
+      <div class="session-modal-actions">
+        <button type="button" (click)="continuarSinExtender()">Ahora no</button>
+        <button type="button" [disabled]="extendiendoSesion" (click)="extenderSesion()">
+          {{ extendiendoSesion ? 'EXTENDIENDO…' : 'EXTENDER SESIÓN' }}
+        </button>
+      </div>
+    </section>
+  </div>
+}

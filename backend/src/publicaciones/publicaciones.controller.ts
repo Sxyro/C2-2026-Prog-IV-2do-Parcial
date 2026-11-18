@@ -8,6 +8,7 @@ import {
   FileTypeValidator,
   MaxFileSizeValidator,
   Post,
+  Put,
   Query,
   Req,
   UploadedFile,
@@ -20,6 +21,8 @@ import { Request } from 'express';
 import { UsuarioDocument } from '../usuarios/schemas/usuario.schema';
 import { AuthGuard, OptionalAuthGuard } from '../auth/auth.guard';
 import { CrearPublicacionDto } from './dto/crear-publicacion.dto';
+import { CrearComentarioDto } from './dto/crear-comentario.dto';
+import { ListarComentariosDto } from './dto/listar-comentarios.dto';
 import { ListarPublicacionesDto } from './dto/listar-publicaciones.dto';
 import {
   PaginaPublicaciones,
@@ -66,6 +69,56 @@ export class PublicacionesController {
     return this.publicacionesService.listar(
       filtros,
       request.user ? String(request.user._id) : undefined,
+    );
+  }
+
+  @Get(':id')
+  @UseGuards(OptionalAuthGuard)
+  obtener(
+    @Param('id') id: string,
+    @Req() request: AuthenticatedRequest,
+  ) {
+    return this.publicacionesService.obtener(
+      id,
+      request.user ? String(request.user._id) : undefined,
+    );
+  }
+
+  @Get(':id/comentarios')
+  listarComentarios(
+    @Param('id') id: string,
+    @Query() filtros: ListarComentariosDto,
+  ) {
+    return this.publicacionesService.listarComentarios(id, filtros);
+  }
+
+  @Post(':id/comentarios')
+  @UseGuards(AuthGuard)
+  crearComentario(
+    @Param('id') id: string,
+    @Body() datos: CrearComentarioDto,
+    @Req() request: AuthenticatedRequest,
+  ) {
+    return this.publicacionesService.crearComentario(
+      id,
+      datos,
+      request.user!,
+    );
+  }
+
+  @Put(':id/comentarios/:comentarioId')
+  @UseGuards(AuthGuard)
+  actualizarComentario(
+    @Param('id') id: string,
+    @Param('comentarioId') comentarioId: string,
+    @Body() datos: CrearComentarioDto,
+    @Req() request: AuthenticatedRequest,
+  ) {
+    return this.publicacionesService.actualizarComentario(
+      id,
+      comentarioId,
+      datos,
+      request.user!,
     );
   }
 
